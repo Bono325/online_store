@@ -1,0 +1,127 @@
+const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const User = require('../models/user');
+const Brand = require('../models/brands');
+
+exports.signupUser = (req, res, next) => {
+  User.find({email:req.body.email})
+  .exec()
+  .then(user =>{
+    if(user.length >= 1) {
+      res.status(409).json({
+        message: 'Account found for this email'
+      });
+    }else {
+      bcrypt.hash( req.body.password,10, (err,hash) =>{
+        if(err) {
+          return ({
+            error:err
+          });
+        }else{
+          const user = new User({
+            _id: new mongoose.Types.ObjectId(),
+            brandLogo: req.file.path,
+            brandname: req.body.brandname,
+            firstname: req.body.firstname,
+            lastname: req.body.lastname,
+            email: req.body.email,
+            cellno:req.body.cellno,
+            password: hash
+          });
+          const brand = new Brand ({
+            _id: new mongoose.Types.ObjectId(),
+            brandLogo: user.brandLogo,
+            brandName: user.brandname
+          });
+          user.save()
+          .then(result => {
+            console.log(result);
+            res.status(201).json({
+              message: 'user was created'
+            });
+          //   brand.save()
+          // .then(result => {
+          //   console.log(result);
+          //   res.status(201).json({
+          //     message: 'Added to brands'
+          //   });
+          // })
+          // .catch(err => {
+          //   console.log(err);
+          //   res.status(500).json({
+          //     error: err
+          //   });
+          // })
+          })
+          .catch(err => {
+            console.log(err);
+            res.status(500).json({
+              error:err
+            });
+          })
+          
+        }
+      });
+    }
+  })
+}
+
+exports.deleteUser = (req, res, next) => {
+  User.deleteOne({_id: req.params.userId})
+  .exec()
+  .then( res.status(200).json({
+    message: 'User deleted'
+  }))
+  .catch(err =>{
+    Console.log(err);
+    res.status(500).json({
+      error:err
+    })
+  })
+}
+
+exports.logIn = (req, res, next) => {
+  User.findOne({email: req.body.email})
+  .exec()
+  .then(user => {
+    if(user.length<1){
+      res.status(401).json({
+        message: 'Auth failed'
+      });
+    }
+    bcrypt.compare(req.body.password, user.password, (err, result) =>{
+      if(err) {
+        return res.status(401).json({
+          message: 'Auth failed'
+        });
+      }
+      if(result) {
+
+        const token = jwt.sign(
+          {
+            email: user.email,
+            fristname: user.firstname,
+            brandLogo: user.brandLogo,
+            brandname: user.brandname,
+            id: user._id
+          },
+         process.env.JWT_KEY,
+          {
+            expiresIn: "1hr"
+          }
+        );
+
+        return res.status(200).json({
+            message: 'Auth Successful',
+            token: token
+          });
+      }
+      res.status(401).json({
+        message: 'Auth failed'
+      });
+
+    })
+  })
+  .catch();
+}
