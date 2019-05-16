@@ -4,6 +4,8 @@ const Product =require('../models/product');
 
 const Brand = require('../models/brands');
 
+const User = require('../models/user');
+
 
 exports.get_all_products = (req, res, next) => {
   Product.find()
@@ -19,6 +21,7 @@ exports.get_all_products = (req, res, next) => {
           designer: doc.designer,
           size: doc.size,
           productImage: doc.productImage,
+          userId: doc.designerId,
           requests: {
             type: 'GET',
             url:'localhost:3000/products/'+doc._id
@@ -62,7 +65,8 @@ exports.create_new_product =  (req, res, next) => {
     price: req.body.price,
     designer: req.body.designer,
     size: req.body.size,
-    productImage: req.file.path
+    productImage: req.file.path,
+    designerId: req.body.userId
   });   
 
   product.save()
@@ -78,6 +82,7 @@ exports.create_new_product =  (req, res, next) => {
           color: result.color,
           size: result.size,
           quantity: result.quantity,
+          designerinfo: result.designerId,
           requests: {
             type: 'GET',
             url:'localhost:3000/products/'+result._id
@@ -106,12 +111,14 @@ exports.get_product = (req, res, next) => {
         designer: doc.designer,
         color: doc.color,
         size: doc.size,
+        userid: doc.designerId,
         quantity: doc.quantity,
         request: {
           type:'GET',
           url:'localhost:3000/products'
         }
       }
+      
       res.status(200).json(result);
     }else{
       res.status(500).json({
@@ -122,7 +129,7 @@ exports.get_product = (req, res, next) => {
   })
   .catch(err =>{
     console.log(err);
-    res.status(500).json({erroe:err});
+    res.status(500).json({error:err});
   });
 };
 

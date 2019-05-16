@@ -104,7 +104,7 @@ exports.logIn = (req, res, next) => {
             fristname: user.firstname,
             brandLogo: user.brandLogo,
             brandname: user.brandname,
-            id: user._id
+            userId: user._id
           },
          process.env.JWT_KEY,
           {
@@ -124,4 +124,13 @@ exports.logIn = (req, res, next) => {
     })
   })
   .catch();
+}
+
+exports.getDesignerInfo = (req, res, next) =>{
+  User.findById(req.params.userId)
+  .select('firstname cellno email')
+  .then(user => {
+    res.status(200).json(user)
+  })
+  .catch(err => console.log(err))
 }
