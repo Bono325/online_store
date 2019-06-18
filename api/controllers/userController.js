@@ -19,9 +19,16 @@ exports.signupUser = (req, res, next) => {
             error:err
           });
         }else{
+          let filePath;
+          if(!req.file){
+            filePath='uploads\\MK.png'
+          }
+          else{
+            filePath=req.file.path
+          }
           const user = new User({
             _id: new mongoose.Types.ObjectId(),
-            brandLogo: req.file.path,
+            brandLogo: filePath,
             brandname: req.body.brandname,
             firstname: req.body.firstname,
             lastname: req.body.lastname,
@@ -40,19 +47,6 @@ exports.signupUser = (req, res, next) => {
             res.status(201).json({
               message: 'user was created'
             });
-          //   brand.save()
-          // .then(result => {
-          //   console.log(result);
-          //   res.status(201).json({
-          //     message: 'Added to brands'
-          //   });
-          // })
-          // .catch(err => {
-          //   console.log(err);
-          //   res.status(500).json({
-          //     error: err
-          //   });
-          // })
           })
           .catch(err => {
             console.log(err);
@@ -128,7 +122,7 @@ exports.logIn = (req, res, next) => {
 
 exports.getDesignerInfo = (req, res, next) =>{
   User.findById(req.params.userId)
-  .select('firstname cellno email')
+  .select('firstname cellno email lastname brandLogo brandname')
   .then(user => {
     res.status(200).json(user)
   })

@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const path = require('path');
 
 const prouductsRoute = require('./api/routes/products');
 const ordersRoute =  require('./api/routes/orders');
@@ -31,6 +32,14 @@ app.use((req, res, next) => {
 app.use('/products', prouductsRoute);
 app.use('/orders', ordersRoute);
 app.use('/user', userRoute);
+
+if(process.env.NODE_ENV === 'production'){
+  app.use(express.static('client/build'));
+
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
+  })
+}
 
 app.use((req, res, next) => {
   const error = new Error ('Not found');
