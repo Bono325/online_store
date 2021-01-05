@@ -16,7 +16,7 @@
   "author": "Bono",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.18.0",
+    "axios": "^0.21.1",
     "bcrypt": "^3.0.5",
     "body-parser": "^1.18.3",
     "concurrently": "^4.1.0",
